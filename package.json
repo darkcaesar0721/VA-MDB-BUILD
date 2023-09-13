@@ -1,0 +1,28 @@
+{
+  "name": "VA-MDB-BUILD",
+  "version": "1.0.0",
+  "description": "VA-MDB-BUILD Tom is a web application to help automate uploading data from an Access database (MDB file) to Google Sheets.",
+  "main": "index.js",
+  "scripts": {
+    "SERVER_3000": "cd SERVER_3000 && npm start",
+    "SERVER_3001": "cd SERVER_3001 && npm start",
+    "SERVER_3002": "cd SERVER_3002 && npm start",
+    "SERVER_3003": "cd SERVER_3003 && npm start",
+    "SERVER_3004": "cd SERVER_3004 && npm start",
+    "start": "concurrently \"npm run SERVER_3000\" \"npm run SERVER_3001\" \"npm run SERVER_3002\" \"npm run SERVER_3003\" \"npm run SERVER_3004\" "
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/darkcaesar0721/MDB.Sheet.Tom.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/darkcaesar0721/MDB.Sheet.Tom/issues"
+  },
+  "homepage": "https://github.com/darkcaesar0721/MDB.Sheet.Tom#readme",
+  "dependencies": {
+    "concurrently": "^8.2.1"
+  }
+}
