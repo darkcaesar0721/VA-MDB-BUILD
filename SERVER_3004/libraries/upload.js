@@ -37,6 +37,9 @@ const uploadSheet = async function (groupId = "", campaignId = "", manually = fa
 
     const groupCampaign = group.campaigns.filter(c => c.detail == campaignId)[0];
 
+    const today = moment().format("M/D/Y hh:mm:ss");
+    Groups.updateOne({_id: groupId, "campaigns.detail": campaignId}, {"campaigns.$.last_upload_start_datetime": today}, (err, doc) => {});
+
     const authClientObject = await auth.getClient();//Google sheets instance
     const googleSheetsInstance = google.sheets({version: "v4", auth: authClientObject});
 
@@ -148,7 +151,6 @@ const uploadSheet = async function (groupId = "", campaignId = "", manually = fa
                     }
                     break;
                 case 'PERIOD':
-                    const today = moment().format('M/D/Y');
                     const start_date = moment().subtract(groupCampaign.filter.period_start, 'days').format('M/D/Y');
                     const end_date = moment().subtract(groupCampaign.filter.period_end, 'days').format('M/D/Y');
 
@@ -296,8 +298,8 @@ const uploadSheet = async function (groupId = "", campaignId = "", manually = fa
             }
             Campaigns.findByIdAndUpdate(campaignId, campaign, function(err, c) {
                 Campaigns.findOne({_id: campaignId}, (err, updatedCampaign) => {
-                    const today = moment().format("MM/DD/YYYY");
-                    Groups.updateOne({_id: groupId, "campaigns.detail": campaignId}, {"campaigns.$.last_uploaded_date": today}, (err, doc) => {
+                    const today = moment().format("M/D/Y hh:mm:ss");
+                    Groups.updateOne({_id: groupId, "campaigns.detail": campaignId}, {"campaigns.$.last_upload_end_datetime": today}, (err, doc) => {
                         callback({status: 'success', campaign: updatedCampaign});
                     });
                 });
