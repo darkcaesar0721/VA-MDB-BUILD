@@ -92,4 +92,14 @@ router.post('/update_is_manually', async  (req, res) => {
     });
 });
 
+router.post('/stop_campaign_running', async  (req, res) => {
+    const groupId = req.body.groupId;
+    const campaignId = req.body.campaignId;
+    Groups.updateOne({_id: groupId, "campaigns.is_stop_running_status": true}, {"campaigns.$.is_stop_running_status": false}, (err, doc) => {
+        Groups.updateOne({_id: req.body.groupId, "campaigns._id": campaignId}, {"campaigns.$.is_stop_running_status": true}, (err, doc) => {
+            res.json("success");
+        });
+    });
+});
+
 module.exports = router;

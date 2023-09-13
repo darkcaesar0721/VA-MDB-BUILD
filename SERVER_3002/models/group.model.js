@@ -95,6 +95,10 @@ const groupSchema = new mongoose.Schema({
         }],
         last_upload_start_datetime: Date,
         last_upload_end_datetime: Date,
+        is_stop_running_status: {
+            type: Boolean,
+            default: false
+        }
     }]
 });
 
