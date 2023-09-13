@@ -18,7 +18,7 @@ router.post('/', (req, res) => {
 
 router.put('/:id', (req, res) => {
     Groups.findByIdAndUpdate(req.params.id, req.body, (err, updatedGroup) => {
-        Groups.findOne({_id: req.params.id}).populate('campaigns.campaign').exec((err, group) => {
+        Groups.findOne({_id: req.params.id}, (err, group) => {
             res.json(group);
         });
     });
@@ -43,6 +43,21 @@ router.post('/update_campaign_field', (req, res) => {
         else{
             res.json('success');
         }});
+});
+
+router.post('/get_upload_time', async (req, res) => {
+    const groupId = req.body.groupId;
+    const campaignId = req.body.campaignId;
+
+    const groups = await Groups.find();
+    const group = groups.filter(g => g._id == groupId)[0];
+    const campaigns = group.campaigns;
+    const campaign = campaigns.filter(c => c.detail == campaignId)[0];
+
+    res.json({
+        last_upload_start_datetime: campaign.last_upload_start_datetime,
+        last_upload_end_datetime: campaign.last_upload_end_datetime
+    });
 });
 
 module.exports = router;
