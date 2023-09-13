@@ -8,8 +8,12 @@ require('./database/client');
 const controllers = require('./controllers');
 
 const express = require('express');
-const bodyParser = require('body-parser')
+const bodyParser = require('body-parser');
+const cors = require('cors');
 const app = express();
+
+// Enable CORS for all routes
+app.use(cors());
 
 app.use(express.static("public")); // we need to tell express to use the public directory for static files... this way our app will find index.html as the route of the application! We can then attach React to that file!
 app.use(bodyParser.json({limit: '50mb'}));
