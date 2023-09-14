@@ -8,8 +8,7 @@
     "SERVER_3001": "cd SERVER_3001 && npm start",
     "SERVER_3002": "cd SERVER_3002 && npm start",
     "SERVER_3003": "cd SERVER_3003 && npm start",
-    "SERVER_3004": "cd SERVER_3004 && npm start",
-    "start": "concurrently \"npm run SERVER_3000\" \"npm run SERVER_3001\" \"npm run SERVER_3002\" \"npm run SERVER_3003\" \"npm run SERVER_3004\" "
+    "start": "concurrently \"npm run SERVER_3000\" \"npm run SERVER_3001\" \"npm run SERVER_3002\" \"npm run SERVER_3003\" "
   },
   "repository": {
     "type": "git",
