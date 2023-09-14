@@ -54,10 +54,17 @@ router.post('/get_upload_time', async (req, res) => {
     const campaigns = group.campaigns;
     const campaign = campaigns.filter(c => c.detail == campaignId)[0];
 
-    res.json({
-        last_upload_start_datetime: campaign.last_upload_start_datetime,
-        last_upload_end_datetime: campaign.last_upload_end_datetime
-    });
+    Settings.findOne({}, (err, setting) => {
+        res.json({
+            uploadDateTime: {
+                last_upload_start_datetime: campaign.last_upload_start_datetime,
+                last_upload_end_datetime: campaign.last_upload_end_datetime,
+            },
+            setting: setting
+        });
+    })
+
+
 });
 
 module.exports = router;
