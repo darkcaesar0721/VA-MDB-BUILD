@@ -367,6 +367,18 @@ const get_whatsapp_groups = async (setting) => {
     return await axios(config);
 }
 
+const getColumnName = function(num) {
+    let name = '';
+
+    while (num > 0) {
+        const remainder = (num - 1) % 26;
+        name = String.fromCharCode(65 + remainder) + name;
+        num = Math.floor((num - 1) / 26);
+    }
+
+    return name;
+}
+
 const upload_schedule = async function (group = {}, campaign = {}, setting = {}, callback) {
     const authClientObject = await auth.getClient();//Google sheets instance
     const googleSheetsInstance = google.sheets({version: "v4", auth: authClientObject});
@@ -405,8 +417,9 @@ const upload_schedule = async function (group = {}, campaign = {}, setting = {},
     const weekday = moment().format('dddd');
     const today = moment().format("MM/DD/YYYY");
     let currentRowInd = -1;
-    let sheetRow = [];
     const date_name = weekday === 'Thursday' ? weekday + ' ' + group.name : weekday;
+
+    let updatedValue = '';
 
     readData.data.values.forEach((row, rInd) => {
         let index = 0;
@@ -419,43 +432,55 @@ const upload_schedule = async function (group = {}, campaign = {}, setting = {},
             }
         });
         if (currentRowInd !== -1) {
-            sheetRow = [];
-            for (let i = 0; i < 200; i++) {
-                let cell = '';
-                if (i < row.length) cell = row[i];
-
-                if (i === currentColInd) {
-                    const splitCells = cell.split(' ');
-                    if (splitCells.length > 1) {
-                        sheetRow.push(cell + ' ' + campaign.qty_uploaded);
-                    } else {
-                        if (parseInt(cell) < 13) sheetRow.push(cell + '+' + campaign.qty_uploaded);
-                        else sheetRow.push(cell + ' ' + campaign.qty_uploaded);
-                    }
+            if (currentColInd !== -1) {
+                let cell = row[currentColInd];
+                const splitCells = cell.split(' ');
+                if (splitCells.length > 1) {
+                    updatedValue = cell + ' ' + campaign.qty_uploaded;
                 } else {
-                    sheetRow.push(cell);
+                    if (parseInt(cell) < 13) updatedValue = cell + '+' + campaign.qty_uploaded;
+                    else updatedValue = cell + ' ' + campaign.qty_uploaded;
                 }
             }
         } else {
-            sheetRow = ['', today, date_name];
-            for (let i = 3; i <= currentColInd; i++) {
-                if (i === currentColInd) sheetRow.push(campaign.qty_uploaded);
-                else sheetRow.push(' ');
-            }
+            updatedValue = campaign.qty_uploaded;
         }
     });
 
-    await googleSheetsInstance.spreadsheets.values.update({
-        auth,
-        spreadsheetId,
-        range: currentRowInd === -1 ?
-            sheet.properties.title + '!A' + (readData.data.values.length + 1) + ':ZZ' + (readData.data.values.length + 1) :
-            sheet.properties.title + '!A' + (currentRowInd + 1) + ':ZZ' + (currentRowInd + 1),
-        valueInputOption: "USER_ENTERED",
-        resource: {
-            values: [sheetRow],
-        },
-    });
+    if (currentRowInd === -1) {
+        await googleSheetsInstance.spreadsheets.values.update({
+            auth,
+            spreadsheetId,
+            range: sheet.properties.title + '!B' + (readData.data.values.length + 1),
+            valueInputOption: "USER_ENTERED",
+            resource: {
+                values: [[today]],
+            },
+        });
+        await googleSheetsInstance.spreadsheets.values.update({
+            auth,
+            spreadsheetId,
+            range: sheet.properties.title + '!C' + (readData.data.values.length + 1),
+            valueInputOption: "USER_ENTERED",
+            resource: {
+                values: [[date_name]],
+            },
+        });
+    }
+
+    if (currentColInd !== -1) {
+        await googleSheetsInstance.spreadsheets.values.update({
+            auth,
+            spreadsheetId,
+            range: currentRowInd === -1 ?
+                sheet.properties.title + '!' + getColumnName(currentColInd + 1) + (readData.data.values.length + 1) :
+                sheet.properties.title + '!' + getColumnName(currentColInd + 1) + (currentRowInd + 1),
+            valueInputOption: "USER_ENTERED",
+            resource: {
+                values: [[updatedValue]],
+            },
+        });
+    }
 }
 
 const uploadPreviewSheet = async function (groupId = "", campaignId = "", callback = function () {}) {
