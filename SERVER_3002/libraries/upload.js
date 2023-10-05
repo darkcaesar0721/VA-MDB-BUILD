@@ -442,6 +442,8 @@ const upload_schedule = async function (group = {}, campaign = {}, setting = {},
                         if (parseInt(cell) < 13) updatedValue = cell + '+' + campaign.qty_uploaded;
                         else updatedValue = cell + ' ' + campaign.qty_uploaded;
                     }
+                } else {
+                    updatedValue = campaign.qty_uploaded;
                 }
             }
         } else {
