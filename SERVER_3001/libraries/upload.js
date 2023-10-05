@@ -434,12 +434,14 @@ const upload_schedule = async function (group = {}, campaign = {}, setting = {},
         if (currentRowInd !== -1) {
             if (currentColInd !== -1) {
                 let cell = row[currentColInd];
-                const splitCells = cell.split(' ');
-                if (splitCells.length > 1) {
-                    updatedValue = cell + ' ' + campaign.qty_uploaded;
-                } else {
-                    if (parseInt(cell) < 13) updatedValue = cell + '+' + campaign.qty_uploaded;
-                    else updatedValue = cell + ' ' + campaign.qty_uploaded;
+                if (cell) {
+                    const splitCells = cell.split(' ');
+                    if (splitCells.length > 1) {
+                        updatedValue = cell + ' ' + campaign.qty_uploaded;
+                    } else {
+                        if (parseInt(cell) < 13) updatedValue = cell + '+' + campaign.qty_uploaded;
+                        else updatedValue = cell + ' ' + campaign.qty_uploaded;
+                    }
                 }
             }
         } else {
