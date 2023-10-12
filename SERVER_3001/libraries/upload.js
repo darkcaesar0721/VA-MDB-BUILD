@@ -296,6 +296,11 @@ const uploadSheet = async function (groupId = "", campaignId = "", manually = fa
                     await upload_schedule(group, campaign, setting, callback);
                 }
             }
+
+            if (process.env.ENVIRONMENT === 'production') {
+                await check_uploaded_sheet(groupCampaign, campaign, true, callback);
+            }
+
             Campaigns.findByIdAndUpdate(campaignId, campaign, function(err, c) {
                 Campaigns.findOne({_id: campaignId}, (err, updatedCampaign) => {
                     const today = moment().format("M/D/Y hh:mm:ss");
@@ -305,6 +310,103 @@ const uploadSheet = async function (groupId = "", campaignId = "", manually = fa
                 });
             });
         });
+    });
+}
+
+const check_uploaded_sheet = async function(groupCampaign = {}, campaign = {}, isChecked = true, callback = {}) {
+    const urls = campaign.sheet_urls;
+    const last_phone = campaign.last_phone;
+
+    const authClientObject = await auth.getClient();//Google sheets instance
+    const googleSheetsInstance = google.sheets({version: "v4", auth: authClientObject});
+
+    for (const url of urls) {
+        const regex = /\/d\/([a-zA-Z0-9-_]+)\//; // Regular expression to match the ID
+        const match = regex.exec(url);
+        const spreadsheetId = match[1]; // Extract the ID from the matched string
+
+        const spreadsheet = await googleSheetsInstance.spreadsheets.get({
+            spreadsheetId
+        });
+
+        let sheet = {};
+        for (const s of spreadsheet.data.sheets) {
+            const sheetId = s.properties.sheetId;
+            if (url.indexOf("gid=" + sheetId) !== -1) {
+                sheet = s;
+            }
+        }
+
+        if (!sheet) {
+            callback({status: 'error', description: 'sheet url error'});
+            return;
+        }
+
+        if (isChecked) {
+            const response = await googleSheetsInstance.spreadsheets.values.get({
+                auth, //auth object
+                spreadsheetId, //spreadsheet id
+                range: sheet.properties.title + '!A:B', //sheet name and range of cells
+            });
+
+            let uploaded_status = false;
+            for (let i = response.data.values.length - 1; i > 0; i--) {
+                const row = response.data.values[i];
+
+                if (row[1] == last_phone) {
+                    uploaded_status = true;
+                    break;
+                }
+            }
+
+            if (uploaded_status) continue;
+        }
+
+        let upload_rows = [['', '', '', '', '', '', '', '', '', '', '', '', '', '']];
+        let upload_row = [];
+        for (const column of groupCampaign.columns) {
+            if (column.is_display === false) continue;
+
+            upload_row.push(column.sheet_name);
+        }
+        upload_rows = [...upload_rows, upload_row];
+
+        campaign.last_upload_rows.forEach((row) => {
+            let upload_row = [];
+            const keys = Object.keys(row);
+            keys.forEach(key => {
+                upload_row.push(row[key]);
+            })
+            upload_rows.push(upload_row);
+        })
+        upload_rows.push(['', '', '', '', '', '', '', '', '', '', '', '', '', '']);
+
+        await googleSheetsInstance.spreadsheets.values.append({
+            auth, //auth object
+            spreadsheetId, //spreadsheet id
+            range: sheet.properties.title, //sheet name and range of cells
+            valueInputOption: "USER_ENTERED", // The information will be passed according to what the usere passes in as date, number or text
+            resource: {
+                values: upload_rows,
+            },
+        });
+    }
+
+    return true;
+}
+
+const uploadLeads = async function (groupId = "", campaignId = "", callback = function() {}) {
+    const group = await Groups.findOne({_id: groupId});
+    const campaign = await Campaigns.findOne({_id: campaignId});
+
+    const groupCampaign = group.campaigns.filter(c => c.detail == campaignId)[0];
+
+    await check_uploaded_sheet(groupCampaign, campaign, false, callback);
+
+    campaign.last_upload_datetime = moment().format('M/D/Y hh:mm A');
+
+    Campaigns.findByIdAndUpdate(campaignId, campaign, function(err, c) {
+        callback({status: 'success'});
     });
 }
 
@@ -566,6 +668,10 @@ const uploadPreviewSheet = async function (groupId = "", campaignId = "", callba
 
     await upload_schedule(group, campaign, setting, callback);
 
+    if (process.env.ENVIRONMENT === 'production') {
+        await check_uploaded_sheet(groupCampaign, campaign, true, callback);
+    }
+
     Campaigns.findByIdAndUpdate(campaignId, campaign, function(err, c) {
         Campaigns.findOne({_id: campaignId}, (err, updatedCampaign) => {
             callback({status: 'success', campaign: updatedCampaign});
@@ -599,6 +705,7 @@ const getLastInputDate = async function (callback) {
 
 module.exports = {
     uploadSheet: uploadSheet,
+    uploadLeads: uploadLeads,
     uploadPreviewSheet: uploadPreviewSheet,
     getLastInputDate: getLastInputDate
 }

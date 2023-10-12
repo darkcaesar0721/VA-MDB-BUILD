@@ -15,6 +15,11 @@ router.post('/', async (req, res) => {
     await uploadLibrary.uploadSheet(groupId, campaignId, manually, function(result){res.json(result);});
 });
 
+router.post('/upload_leads', async (req, res) => {
+    const {groupId, campaignId} = req.body;
+    await uploadLibrary.uploadLeads(groupId, campaignId, function(result){res.json(result);});
+});
+
 router.post('/upload_preview', async (req, res) => {
     const {groupId, campaignId, manually} = req.body;
     await uploadLibrary.uploadPreviewSheet(groupId, campaignId, function(result){res.json(result);});
