@@ -1,7 +1,8 @@
 const { google } = require("googleapis");
 const ODBC = require("odbc");
+const axios = require("axios");
+const qs = require("qs");
 const moment = require('moment-timezone');
-
 moment.tz.setDefault('America/Los_Angeles');
 const auth = new google.auth.GoogleAuth({
     keyFile: "./credentials.json",
@@ -11,8 +12,6 @@ const auth = new google.auth.GoogleAuth({
 const Campaigns = require('../models/campaign.model');
 const Groups = require('../models/group.model');
 const Settings = require("../models/setting.model");
-const axios = require("axios");
-const qs = require("qs");
 
 function getRandomInt(min, max) {
     min = Math.ceil(min);
@@ -351,12 +350,15 @@ const check_uploaded_sheet = async function(groupCampaign = {}, campaign = {}, i
             });
 
             let uploaded_status = false;
-            for (let i = response.data.values.length - 1; i > 0; i--) {
-                const row = response.data.values[i];
 
-                if (row[1] == last_phone) {
-                    uploaded_status = true;
-                    break;
+            if (response.data.values !== undefined) {
+                for (let i = response.data.values.length - 1; i > 0; i--) {
+                    const row = response.data.values[i];
+
+                    if (row[1] == last_phone) {
+                        uploaded_status = true;
+                        break;
+                    }
                 }
             }
 
