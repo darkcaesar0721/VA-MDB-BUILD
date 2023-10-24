@@ -4,14 +4,15 @@ const axios = require("axios");
 const qs = require("qs");
 const moment = require('moment-timezone');
 moment.tz.setDefault('America/Los_Angeles');
-const auth = new google.auth.GoogleAuth({
-    keyFile: "./credentials.json",
-    scopes: "https://www.googleapis.com/auth/spreadsheets",
-});
 
 const Campaigns = require('../models/campaign.model');
 const Groups = require('../models/group.model');
 const Settings = require("../models/setting.model");
+
+const auth = new google.auth.GoogleAuth({
+    keyFile: "./credentials.json",
+    scopes: "https://www.googleapis.com/auth/spreadsheets",
+});
 
 function getRandomInt(min, max) {
     min = Math.ceil(min);
@@ -19,7 +20,7 @@ function getRandomInt(min, max) {
     return Math.floor(Math.random() * (max - min) + min); // The maximum is exclusive and the minimum is inclusive
 }
 
-function generateRandomIntegers(count, min, max) {
+const generateRandomIntegers = function (count, min, max) {
     const randomIntegers = [];
 
     for (let i = 0; i < count; i++) {

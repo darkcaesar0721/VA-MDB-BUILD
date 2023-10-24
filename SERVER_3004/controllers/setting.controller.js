@@ -1,14 +1,13 @@
 const express = require('express');
 const router = express.Router();
 const formidable = require('formidable');
-
-const Settings = require('../models/setting.model');
 const fs = require("fs");
-const Campaigns = require("../models/campaign.model");
-const Groups = require("../models/group.model");
-
 const moment = require('moment-timezone');
 moment.tz.setDefault('America/Los_Angeles');
+
+const Settings = require('../models/setting.model');
+const Campaigns = require("../models/campaign.model");
+const Groups = require("../models/group.model");
 
 router.get('/', (req, res) => {
     Settings.findOne({}, (err, setting) => {
