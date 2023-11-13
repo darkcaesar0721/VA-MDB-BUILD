@@ -31,6 +31,32 @@ const generateRandomIntegers = function (count, min, max) {
     return randomIntegers.sort();
 }
 
+const checkDuplicatedLeadInfo = function(leads, lead, columns) {
+    let isDuplicated = false;
+
+    for (const ld of leads) {
+        let nComparedColumns = 0;
+        let nDuplicatedColumns = 0;
+
+        for (const column of columns) {
+            if (column.is_display === false || column.mdb_name === 'Phone') continue;
+
+            nComparedColumns++;
+
+            if(lead[column.mdb_name] == ld[column.mdb_name]) {
+                nDuplicatedColumns++;                
+            }
+        }
+
+        if (nComparedColumns == nDuplicatedColumns) {
+            isDuplicated = true;
+            break;
+        }
+    }
+
+    return isDuplicated;
+}
+
 const uploadSheet = async function (groupId = "", campaignId = "", manually = false, callback = function() {}) {
     const group = await Groups.findOne({_id: groupId});
     const campaign = await Campaigns.findOne({_id: campaignId});
@@ -60,7 +86,9 @@ const uploadSheet = async function (groupId = "", campaignId = "", manually = fa
                 callback({status: 'error', description: "mdb query error."});
                 return;
             }
+
             let rows = [];
+            let nScheduleCount = 0;
 
             let mdbRows = [];
             for (let i = 0; i < result.length; i++) {
@@ -77,6 +105,9 @@ const uploadSheet = async function (groupId = "", campaignId = "", manually = fa
                             if (column.is_display === false) continue;
                             row[column.mdb_name] = mdbRow[column.mdb_name];
                         }
+
+                        if (!checkDuplicatedLeadInfo(rows, row, groupCampaign.columns)) nScheduleCount++;
+
                         rows.push(row);
                     })
                     break;
@@ -89,6 +120,9 @@ const uploadSheet = async function (groupId = "", campaignId = "", manually = fa
                             if (column.is_display === false) continue;
                             row[column.mdb_name] = mdbRow[column.mdb_name];
                         }
+
+                        if (!checkDuplicatedLeadInfo(rows, row, groupCampaign.columns)) nScheduleCount++;
+
                         rows.push(row);
                     }
                     break;
@@ -101,6 +135,9 @@ const uploadSheet = async function (groupId = "", campaignId = "", manually = fa
                                 if (column.is_display === false) continue;
                                 row[column.mdb_name] = mdbRow[column.mdb_name];
                             }
+
+                            if (!checkDuplicatedLeadInfo(rows, row, groupCampaign.columns)) nScheduleCount++;
+
                             rows.push(row);
                         }
                     } else {
@@ -114,6 +151,9 @@ const uploadSheet = async function (groupId = "", campaignId = "", manually = fa
                                         if (column.is_display === false) continue;
                                         row[column.mdb_name] = mdbRow[column.mdb_name];
                                     }
+
+                                    if (!checkDuplicatedLeadInfo(rows, row, groupCampaign.columns)) nScheduleCount++;
+
                                     rows.push(row);
                                 }
                             })
@@ -129,6 +169,9 @@ const uploadSheet = async function (groupId = "", campaignId = "", manually = fa
                                 if (column.is_display === false) continue;
                                 row[column.mdb_name] = mdbRow[column.mdb_name];
                             }
+
+                            if (!checkDuplicatedLeadInfo(rows, row, groupCampaign.columns)) nScheduleCount++;
+
                             rows.push(row);
                         }
                     } else {
@@ -145,6 +188,9 @@ const uploadSheet = async function (groupId = "", campaignId = "", manually = fa
                                         if (column.is_display === false) continue;
                                         row[column.mdb_name] = mdbRow[column.mdb_name];
                                     }
+
+                                    if (!checkDuplicatedLeadInfo(rows, row, groupCampaign.columns)) nScheduleCount++;
+
                                     rows.push(row);
                                 }
                             })
@@ -165,6 +211,9 @@ const uploadSheet = async function (groupId = "", campaignId = "", manually = fa
                                 if (column.is_display === false) continue;
                                 row[column.mdb_name] = mdbRow[column.mdb_name];
                             }
+
+                            if (!checkDuplicatedLeadInfo(rows, row, groupCampaign.columns)) nScheduleCount++;
+
                             rows.push(row);
                         }
                     })
@@ -185,6 +234,9 @@ const uploadSheet = async function (groupId = "", campaignId = "", manually = fa
                                     if (column.is_display === false) continue;
                                     row[column.mdb_name] = mdbRow[column.mdb_name];
                                 }
+
+                                if (!checkDuplicatedLeadInfo(rows, row, groupCampaign.columns)) nScheduleCount++;
+
                                 rows.push(row);
                             }
                         })
@@ -201,6 +253,9 @@ const uploadSheet = async function (groupId = "", campaignId = "", manually = fa
                                     if (column.is_display === false) continue;
                                     row[column.mdb_name] = mdbRow[column.mdb_name];
                                 }
+
+                                if (!checkDuplicatedLeadInfo(rows, row, groupCampaign.columns)) nScheduleCount++;
+
                                 rows.push(row);
                             }
                         })
@@ -211,6 +266,7 @@ const uploadSheet = async function (groupId = "", campaignId = "", manually = fa
             if (manually === true) {
                 campaign.last_temp_upload_info.qty_available = mdbRows.length;
                 campaign.last_temp_upload_info.qty_uploaded = rows.length;
+                campaign.last_temp_upload_info.qty_schedule = nScheduleCount;
 
                 if (rows.length > 0) {
                     campaign.last_temp_upload_info.last_phone = mdbRows[0]['Phone'];
@@ -224,6 +280,7 @@ const uploadSheet = async function (groupId = "", campaignId = "", manually = fa
             } else {
                 campaign.qty_available = mdbRows.length;
                 campaign.qty_uploaded = rows.length;
+                campaign.qty_schedule = nScheduleCount;
 
                 if (rows.length > 0) {
                     campaign.last_phone = mdbRows[0]['Phone'];
@@ -543,17 +600,17 @@ const upload_schedule = async function (group = {}, campaign = {}, setting = {},
                 if (cell) {
                     const splitCells = cell.split(' ');
                     if (splitCells.length > 1) {
-                        updatedValue = cell + ' ' + campaign.qty_uploaded;
+                        updatedValue = cell + ' ' + campaign.qty_schedule;
                     } else {
-                        if (parseInt(cell) < 13) updatedValue = cell + '+' + campaign.qty_uploaded;
-                        else updatedValue = cell + ' ' + campaign.qty_uploaded;
+                        if (parseInt(cell) < 13) updatedValue = cell + '+' + campaign.qty_schedule;
+                        else updatedValue = cell + ' ' + campaign.qty_schedule;
                     }
                 } else {
-                    updatedValue = campaign.qty_uploaded;
+                    updatedValue = campaign.qty_schedule;
                 }
             }
         } else {
-            updatedValue = campaign.qty_uploaded;
+            updatedValue = campaign.qty_schedule;
         }
     });
 
@@ -661,6 +718,7 @@ const uploadPreviewSheet = async function (groupId = "", campaignId = "", callba
 
     campaign.qty_available = campaign.last_temp_upload_info.qty_available;
     campaign.qty_uploaded = campaign.last_temp_upload_info.qty_uploaded;
+    campaign.qty_schedule = campaign.last_temp_upload_info.qty_schedule;
     campaign.last_phone = campaign.last_temp_upload_info.last_phone;
     campaign.system_create_datetime = campaign.last_temp_upload_info.system_create_datetime;
     campaign.last_upload_rows = campaign.last_temp_upload_info.upload_rows;

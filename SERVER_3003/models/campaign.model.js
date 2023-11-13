@@ -14,6 +14,7 @@ const campaignSchema = new mongoose.Schema({
     }],
     qty_available: Number,
     qty_uploaded: Number,
+    qty_schedule: Number,
     last_upload_datetime: Date,
     last_phone: String,
     is_manually_uploaded: {
@@ -28,6 +29,7 @@ const campaignSchema = new mongoose.Schema({
     last_temp_upload_info: {
         qty_available: Number,
         qty_uploaded: Number,
+        qty_schedule: Number,
         last_phone: String,
         system_create_datetime: Date,
         upload_rows: []
