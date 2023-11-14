@@ -34,6 +34,8 @@ const generateRandomIntegers = function (count, min, max) {
 const checkDuplicatedLeadInfo = function(leads, lead, columns) {
     let isDuplicated = false;
 
+    const regex = /^[\s\.]+|[\s\.]+$/g;
+
     for (const ld of leads) {
         let nComparedColumns = 0;
         let nDuplicatedColumns = 0;
@@ -43,7 +45,7 @@ const checkDuplicatedLeadInfo = function(leads, lead, columns) {
 
             nComparedColumns++;
 
-            if(lead[column.mdb_name] == ld[column.mdb_name]) {
+            if(lead[column.mdb_name].replace(regex, "") == ld[column.mdb_name].replace(regex, "")) {
                 nDuplicatedColumns++;                
             }
         }
