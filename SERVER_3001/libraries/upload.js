@@ -45,7 +45,7 @@ const checkDuplicatedLeadInfo = function(leads, lead, columns) {
 
             nComparedColumns++;
 
-            if (lead[column.mdb_name] !== undefined && ld[column.mdb_name] !== undefined) {
+            if (lead[column.mdb_name] !== undefined && lead[column.mdb_name] !== null && ld[column.mdb_name] !== undefined && ld[column.mdb_name] !== null) {
                 if(lead[column.mdb_name].replace(regex, "") == ld[column.mdb_name].replace(regex, "")) {
                     nDuplicatedColumns++;                
                 }
