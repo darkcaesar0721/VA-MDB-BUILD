@@ -4,11 +4,9 @@ const ODBC = require("odbc");
 
 const Groups = require('../models/group.model');
 const Campaigns = require('../models/campaign.model');
-
-const whatsappLibrary = require('../libraries/whatsapp');
-const uploadLibrary = require('../libraries/upload');
 const Settings = require("../models/setting.model");
-const moment = require("moment");
+
+const uploadLibrary = require('../libraries/upload');
 
 router.post('/', async (req, res) => {
     const {groupId, campaignId, manually} = req.body;
@@ -21,12 +19,11 @@ router.post('/upload_leads', async (req, res) => {
 });
 
 router.post('/upload_preview', async (req, res) => {
-    const {groupId, campaignId, manually} = req.body;
+    const {groupId, campaignId} = req.body;
     await uploadLibrary.uploadPreviewSheet(groupId, campaignId, function(result){res.json(result);});
 });
 
 router.get('/get_last_phone', (req, res) => {
-    const mdb_path = req.query.mdb_path;
     const id = req.query.campaignId;
 
     Campaigns.findOne({_id: id}, (err, campaign) => {
@@ -72,7 +69,7 @@ router.post('/get_last_input_date', async (req, res) => {
         if (result.status === "error") {
             res.json(result);
         } else {
-            Groups.updateOne({_id: req.body.groupId}, {last_control_date: req.body.currentDate, last_input_date: result.date}, function(err, doc) {
+            Groups.updateOne({_id: req.body.groupId}, {last_control_date: req.body.currentDate, last_input_date: result.inputDate, last_service_date: result.serviceDate}, function(err, doc) {
                 res.json(result);
             });
         }

@@ -45,7 +45,7 @@ const checkDuplicatedLeadInfo = function(leads, lead, columns) {
 
             nComparedColumns++;
 
-            if (lead[column.mdb_name] !== undefined && ld[column.mdb_name] !== undefined) {
+            if (lead[column.mdb_name] !== undefined && lead[column.mdb_name] !== null && ld[column.mdb_name] !== undefined && ld[column.mdb_name] !== null) {
                 if(lead[column.mdb_name].replace(regex, "") == ld[column.mdb_name].replace(regex, "")) {
                     nDuplicatedColumns++;                
                 }
@@ -754,17 +754,29 @@ const getLastInputDate = async function (callback) {
             callback({status: 'error', description: "Please can't connect to this MDB file."});
         }
 
-        const query = "002_DateInput";
-        connection.query(`SELECT TOP 1 * FROM [${query}]`, async (error, result) => {
-            await connection.close();
-
-            if (error) {
-                callback({status: 'error', description: "Please can't run the this query."});
+        const input_query = "002_DateInput";
+        connection.query(`SELECT TOP 1 * FROM [${input_query}]`, async (input_error, input_result) => {
+            if (input_error) {
+                await connection.close();
+                callback({status: 'error', description: "Please can't run the 002_DateInput."});
                 return;
             }
 
-            const date = moment(new Date(result[0]['Date'])).format('M/D/YYYY');
-            callback({status: 'success', date: date});
+            const input_date = moment(new Date(input_result[0]['Date'])).format('M/D/YYYY');
+
+            const service_query = "003c_002 Service Data County Date  <<";
+            connection.query(`SELECT TOP 1 * FROM [${service_query}]`, async (service_error, service_result) => {
+                await connection.close();
+
+                if (service_error) {
+                    callback({status: 'error', description: "Please can't run the 003c_002 Service Data County Date  <<."});
+                    return;
+                }
+
+                const service_date = moment(new Date(service_result[0]['Date'])).format('M/D/YYYY');
+
+                callback({status: 'success', inputDate: input_date, serviceDate: service_date});
+            });
         });
     });
 }
