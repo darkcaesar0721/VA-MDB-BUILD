@@ -52,7 +52,7 @@ const checkDuplicatedLeadInfo = function(leads, lead, columns) {
             }
         }
 
-        if (nComparedColumns == nDuplicatedColumns) {
+        if (nDuplicatedColumns >= 5) {
             isDuplicated = true;
             break;
         }
