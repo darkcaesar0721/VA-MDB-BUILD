@@ -41,7 +41,7 @@ const checkDuplicatedLeadInfo = function(leads, lead, columns) {
         let nDuplicatedColumns = 0;
 
         for (const column of columns) {
-            if (column.is_display === false || column.mdb_name === 'Phone') continue;
+            if (column.is_display === false || column.mdb_name === 'Phone' || column.mdb_name === 'Mobile') continue;
 
             nComparedColumns++;
 
