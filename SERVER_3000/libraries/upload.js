@@ -17,7 +17,7 @@ const auth = new google.auth.GoogleAuth({
 function getRandomInt(min, max) {
     min = Math.ceil(min);
     max = Math.floor(max);
-    return Math.floor(Math.random() * (max - min) + min);
+    return Math.floor(Math.random() * (max - min) + min); // The maximum is exclusive and the minimum is inclusive
 }
 
 const generateRandomIntegers = function (count, min, max) {
@@ -115,7 +115,6 @@ const uploadSheet = async function (groupId = "", campaignId = "", manually = fa
                         rows.push(row);
                     })
                     break;
-
                 case 'STATIC':
                     for (const mdbRow of mdbRows) {
                         if (rows.length === groupCampaign.filter.static_count) break;
@@ -131,7 +130,6 @@ const uploadSheet = async function (groupId = "", campaignId = "", manually = fa
                         rows.push(row);
                     }
                     break;
-
                 case 'RANDOM':
                     let random_count = getRandomInt(groupCampaign.filter.random_start, groupCampaign.filter.random_end);
                     if (random_count >= mdbRows.length) {
@@ -166,7 +164,6 @@ const uploadSheet = async function (groupId = "", campaignId = "", manually = fa
                         })
                     }
                     break;
-
                 case 'RANDOM_FIRST':
                     let random_first_count = getRandomInt(groupCampaign.filter.random_start, groupCampaign.filter.random_end);
                     if (random_first_count >= mdbRows.length) {
@@ -204,7 +201,6 @@ const uploadSheet = async function (groupId = "", campaignId = "", manually = fa
                         })
                     }
                     break;
-
                 case 'PERIOD':
                     const start_date = moment().subtract(groupCampaign.filter.period_start, 'days').format('M/D/Y');
                     const end_date = moment().subtract(groupCampaign.filter.period_end, 'days').format('M/D/Y');
@@ -226,7 +222,6 @@ const uploadSheet = async function (groupId = "", campaignId = "", manually = fa
                         }
                     })
                     break;
-
                 case 'DATE':
                     if (groupCampaign.filter.date_is_time) {
                         const before_date = moment().subtract(groupCampaign.filter.date_old_day, 'days').format('M/D/Y');
@@ -273,7 +268,6 @@ const uploadSheet = async function (groupId = "", campaignId = "", manually = fa
             }
 
             if (manually === true) {
-
                 campaign.last_temp_upload_info.qty_available = mdbRows.length;
                 campaign.last_temp_upload_info.qty_uploaded = rows.length;
                 campaign.last_temp_upload_info.qty_schedule = nScheduleCount;
@@ -287,9 +281,7 @@ const uploadSheet = async function (groupId = "", campaignId = "", manually = fa
                 }
                 campaign.last_temp_upload_info.upload_rows = rows;
                 campaign.is_manually_uploaded = true;
-
             } else {
-
                 campaign.qty_available = mdbRows.length;
                 campaign.qty_uploaded = rows.length;
                 campaign.qty_schedule = nScheduleCount;
@@ -301,16 +293,13 @@ const uploadSheet = async function (groupId = "", campaignId = "", manually = fa
                 campaign.is_get_last_phone = false;
                 campaign.last_upload_datetime = moment().format('M/D/Y hh:mm A');
                 campaign.last_upload_rows = rows;
-
             }
 
             if (manually === false) {
                 if (rows.length > 0) {
-                    
                     if (process.env.ENVIRONMENT === 'production') {
                         await send_whatsapp_message(group, groupCampaign, campaign, setting, callback);
                     }
-                    
                     for (const sheet_url of campaign.sheet_urls) {
                         const regex = /\/d\/([a-zA-Z0-9-_]+)\//; // Regular expression to match the ID
                         const match = regex.exec(sheet_url);
@@ -371,7 +360,7 @@ const uploadSheet = async function (groupId = "", campaignId = "", manually = fa
             }
 
             if (process.env.ENVIRONMENT === 'production') {
-                await check_uploaded_sheet(groupCampaign, campaign, true, callback);
+                // await check_uploaded_sheet(groupCampaign, campaign, true, callback);
             }
 
             Campaigns.findByIdAndUpdate(campaignId, campaign, function(err, c) {
